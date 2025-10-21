@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SSH Terminal</string>
+    
+    <!-- Host List Screen -->
+    <string name="host_list_title">SSH Connections</string>
+    <string name="host_list_empty">No connections saved</string>
+    <string name="host_list_add_connection">Add connection</string>
+    
+    <!-- Connection Screen -->
+    <string name="connection_title">New Connection</string>
+    <string name="connection_edit_title">Edit Connection</string>
+    <string name="connection_host">Host</string>
+    <string name="connection_host_hint">192.168.1.100 or example.com</string>
+    <string name="connection_port">Port</string>
+    <string name="connection_port_hint">22</string>
+    <string name="connection_username">Username</string>
+    <string name="connection_username_hint">root</string>
+    <string name="connection_password">Password</string>
+    <string name="connection_password_hint">Optional</string>
+    <string name="connection_private_key">Private Key</string>
+    <string name="connection_private_key_hint">Optional (PEM format)</string>
+    <string name="connection_name">Connection Name</string>
+    <string name="connection_name_hint">My Server</string>
+    <string name="connection_save">Save</string>
+    <string name="connection_connect">Connect</string>
+    <string name="connection_test">Test Connection</string>
+    <string name="connection_auth_method">Authentication Method</string>
+    <string name="connection_auth_password">Password</string>
+    <string name="connection_auth_key">Private Key</string>
+    
+    <!-- Terminal Screen -->
+    <string name="terminal_title">Terminal</string>
+    <string name="terminal_input_hint">Enter command...</string>
+    <string name="terminal_disconnect">Disconnect</string>
+    <string name="terminal_clear">Clear</string>
+    <string name="terminal_connected">Connected to %1$s</string>
+    <string name="terminal_disconnected">Disconnected</string>
+    
+    <!-- Errors -->
+    <string name="error_connection_failed">Connection failed</string>
+    <string name="error_authentication_failed">Authentication failed</string>
+    <string name="error_timeout">Connection timeout</string>
+    <string name="error_invalid_host">Invalid host address</string>
+    <string name="error_invalid_port">Invalid port number</string>
+    <string name="error_invalid_credentials">Invalid credentials</string>
+    <string name="error_network_unavailable">Network unavailable</string>
+    
+    <!-- Common -->
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="edit">Edit</string>
+    <string name="save">Save</string>
+    <string name="close">Close</string>
+    <string name="loading">Loading...</string>
+    <string name="connecting">Connecting...</string>
+</resources>
