@@ -91,9 +91,10 @@ lint/tmp/
 .kotlin/
 
 # Secrets (keystore passwords, API keys, etc.)
+# Note: gradle.properties with project configs SHOULD be versioned
+# Only local.properties and files with secrets should be ignored
 secrets.properties
 keystore.properties
-gradle.properties
 
 # OS-specific files
 .DS_Store
