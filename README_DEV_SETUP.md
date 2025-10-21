@@ -87,6 +87,30 @@ No Android Studio:
 
 ## 🔧 Verificação da Instalação
 
+### Entendendo gradle.properties vs local.properties
+
+**IMPORTANTE**: Este projeto usa dois arquivos de propriedades:
+
+#### `gradle.properties` ✅ (Versionado no Git)
+Contém configurações **públicas** do projeto que todos os desenvolvedores devem usar:
+- Configurações de JVM e memória
+- Flags do Android (useAndroidX, etc.)
+- Otimizações de build (caching, parallel)
+- Estilo de código Kotlin
+
+**Este arquivo DEVE ser commitado** e está no repositório.
+
+#### `local.properties` ❌ (NÃO versionado)
+Contém configurações **específicas da sua máquina**:
+- Caminho do Android SDK (`sdk.dir`)
+- Senhas de keystores
+- API keys e segredos
+- Caminhos absolutos locais
+
+**Este arquivo NUNCA deve ser commitado** (está no `.gitignore`).
+
+O Android Studio cria automaticamente o `local.properties` na primeira sincronização. Se precisar configurar manualmente, veja o exemplo em `local.properties.example`.
+
 ### Verificar Gradle
 
 ```bash

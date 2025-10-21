@@ -1,0 +1,26 @@
+# Local configuration file (sdk path, etc)
+# This file is machine specific and should NOT be versioned.
+# Copy this file to local.properties and update with your paths.
+
+## SDK Location
+# Uncomment and update with your Android SDK path
+# sdk.dir=/home/user/Android/Sdk
+# On Windows:
+# sdk.dir=C\:\\Users\\YourUser\\AppData\\Local\\Android\\Sdk
+# On Mac:
+# sdk.dir=/Users/youruser/Library/Android/sdk
+
+## NDK Location (if needed)
+# ndk.dir=/path/to/ndk
+
+## Release Keystore (for signed releases)
+# Uncomment and configure for production builds
+# KEYSTORE_FILE=/path/to/release-keystore.jks
+# KEYSTORE_PASSWORD=your_keystore_password
+# KEY_ALIAS=your_key_alias
+# KEY_PASSWORD=your_key_password
+
+## API Keys and Secrets
+# Add any API keys or secrets here (NEVER commit this file)
+# GOOGLE_MAPS_API_KEY=your_api_key
+# FIREBASE_API_KEY=your_firebase_key
