@@ -27,7 +27,7 @@ jobs:
       run: chmod +x gradlew
       
     - name: Cache Gradle packages
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ~/.gradle/caches
@@ -44,7 +44,7 @@ jobs:
       
     - name: Generate test report
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: test-results
         path: app/build/reports/tests/
@@ -53,21 +53,21 @@ jobs:
       run: ./gradlew assembleDebug --stacktrace
       
     - name: Upload debug APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: app-debug
         path: app/build/outputs/apk/debug/app-debug.apk
         
     - name: Run Lint
-      run: ./gradlew lint
+      run: ./gradlew lint --stacktrace
       
-    - name: Upload Lint report
+    - name: Upload lint report
+      uses: actions/upload-artifact@v4
       if: always()
-      uses: actions/upload-artifact@v3
       with:
         name: lint-report
         path: app/build/reports/lint-results-debug.html
-        
+
   instrumentation-tests:
     name: Instrumentation Tests
     runs-on: macos-latest
@@ -97,7 +97,7 @@ jobs:
         
     - name: Upload instrumentation test results
       if: always()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: instrumentation-test-results
         path: app/build/reports/androidTests/
