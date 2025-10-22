@@ -399,7 +399,72 @@ Crie templates para código repetitivo:
 - **GitToolBox** - Ferramentas Git extras
 - **Key Promoter X** - Aprender atalhos
 
-## 📚 Recursos Adicionais
+## � Desenvolvimento em Ambientes Sem Android SDK
+
+### Dev Containers / Codespaces
+
+Se você está trabalhando em um dev container, codespace ou ambiente sem Android SDK instalado:
+
+#### Limitações
+
+- ❌ Não é possível compilar o APK diretamente
+- ❌ Não é possível executar o emulador
+- ❌ Testes de instrumentação não rodam
+
+#### O que você PODE fazer
+
+- ✅ Editar código Kotlin/Java
+- ✅ Executar testes unitários (que não dependem do Android framework)
+- ✅ Validar sintaxe e estrutura do projeto
+- ✅ Trabalhar com Git e documentação
+- ✅ Revisar e modificar configurações Gradle
+
+#### Instalando Android SDK no Container
+
+Se precisar do SDK no container:
+
+```bash
+# Baixar Android SDK Command Line Tools
+wget https://dl.google.com/android/repository/commandlinetools-linux-9477386_latest.zip
+unzip commandlinetools-linux-9477386_latest.zip -d ~/android-sdk
+mkdir -p ~/android-sdk/cmdline-tools/latest
+mv ~/android-sdk/cmdline-tools/* ~/android-sdk/cmdline-tools/latest/ 2>/dev/null || true
+
+# Configurar variáveis de ambiente
+export ANDROID_HOME=~/android-sdk
+export PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
+
+# Aceitar licenças
+yes | sdkmanager --licenses
+
+# Instalar componentes necessários
+sdkmanager "platform-tools" "platforms;android-35" "build-tools;34.0.0"
+
+# Criar local.properties
+echo "sdk.dir=$HOME/android-sdk" > local.properties
+```
+
+#### Alternativa: Desenvolvimento Híbrido
+
+Recomendação para máximo produtividade:
+
+1. **Codespace/Container**: Edição de código, Git, revisões
+2. **Máquina Local com Android Studio**: Builds, testes, debugging
+
+**Workflow sugerido**:
+```bash
+# No container: editar código e commitar
+git add .
+git commit -m "feat: nova funcionalidade"
+git push
+
+# Na máquina local: pull e testar
+git pull
+./gradlew clean assembleDebug
+# Executar no emulador/dispositivo
+```
+
+## �📚 Recursos Adicionais
 
 - [Documentação Android](https://developer.android.com/docs)
 - [Jetpack Compose Docs](https://developer.android.com/jetpack/compose)
@@ -411,7 +476,7 @@ Crie templates para código repetitivo:
 
 - Abra uma [issue no GitHub](https://github.com/felipemacedo1/android-ssh-terminal/issues)
 - Consulte as [discussões do projeto](https://github.com/felipemacedo1/android-ssh-terminal/discussions)
-- Email: felipe@example.com (substituir pelo email real)
+- Email: contato.dev.macedo@gmail.com
 
 ---
 
