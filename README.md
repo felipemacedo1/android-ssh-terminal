@@ -12,6 +12,14 @@
 [![Release](https://img.shields.io/github/v/release/felipemacedo1/ktar)](https://github.com/felipemacedo1/ktar/releases)
 [![Downloads](https://img.shields.io/github/downloads/felipemacedo1/ktar/total)](https://github.com/felipemacedo1/ktar/releases)
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=felipemacedo1_ktar&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=felipemacedo1_ktar)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=felipemacedo1_ktar&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=felipemacedo1_ktar)
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=felipemacedo1_ktar&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=felipemacedo1_ktar)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=felipemacedo1_ktar&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=felipemacedo1_ktar)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=felipemacedo1_ktar&metric=coverage)](https://sonarcloud.io/summary/new_code?id=felipemacedo1_ktar)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=felipemacedo1_ktar&metric=bugs)](https://sonarcloud.io/summary/new_code?id=felipemacedo1_ktar)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=felipemacedo1_ktar&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=felipemacedo1_ktar)
+
 Um aplicativo Android profissional e seguro para conexão SSH a servidores remotos, com interface moderna em Jetpack Compose e autenticação robusta.
 
 ## 🚀 Características

@@ -112,13 +112,14 @@ Thumbs.db
 *.tmp
 *.orig
 
-# Android Studio specific
+# IDE specific
 /.idea/caches
 /.idea/libraries
 /.idea/modules.xml
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+.vscode/
 # Documentation not to be versioned (setup guides, private notes)
 SSH_SERVER_SETUP.md
 SETUP_*.md
