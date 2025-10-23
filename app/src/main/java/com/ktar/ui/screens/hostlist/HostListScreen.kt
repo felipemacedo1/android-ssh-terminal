@@ -81,7 +81,7 @@ fun HostListScreenContent(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "v${com.felipemacedo.androidsshterminal.BuildConfig.VERSION_NAME}",
+                    text = "v${com.ktar.BuildConfig.VERSION_NAME}",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
