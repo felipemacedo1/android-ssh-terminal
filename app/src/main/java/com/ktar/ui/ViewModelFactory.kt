@@ -8,6 +8,7 @@ import com.ktar.data.security.SecurityManager
 import com.ktar.ssh.SSHManager
 import com.ktar.ui.screens.connection.ConnectionViewModel
 import com.ktar.ui.screens.hostlist.HostListViewModel
+import com.ktar.ui.screens.terminal.TerminalViewModel
 
 /**
  * Factory for creating ViewModels with dependencies.
@@ -28,6 +29,9 @@ class ViewModelFactory(
             }
             modelClass.isAssignableFrom(HostListViewModel::class.java) -> {
                 HostListViewModel(hostDataStore) as T
+            }
+            modelClass.isAssignableFrom(TerminalViewModel::class.java) -> {
+                TerminalViewModel() as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }
