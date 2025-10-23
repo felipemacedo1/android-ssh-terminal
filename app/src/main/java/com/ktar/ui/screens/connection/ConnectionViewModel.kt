@@ -8,6 +8,7 @@ import com.ktar.data.model.Host
 import com.ktar.data.security.SecurityManager
 import com.ktar.ssh.SSHManager
 import com.ktar.ssh.SSHSession
+import com.ktar.ssh.SessionManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -249,6 +250,10 @@ class ConnectionViewModel(
                 }
 
                 val sessionId = UUID.randomUUID().toString()
+                
+                // Store session for terminal screen
+                SessionManager.storeSession(sessionId, session)
+                
                 _uiState.value = state.copy(
                     isConnecting = false,
                     connectionSuccessful = true,

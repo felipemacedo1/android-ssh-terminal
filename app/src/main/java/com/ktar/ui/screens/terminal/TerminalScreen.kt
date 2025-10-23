@@ -26,6 +26,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.ktar.ssh.SessionManager
 import kotlinx.coroutines.launch
 
 /**
@@ -46,6 +47,16 @@ fun TerminalScreen(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var showMenu by remember { mutableStateOf(false) }
+
+    // Initialize session when screen is created
+    LaunchedEffect(sessionId) {
+        val session = SessionManager.getSession(sessionId)
+        if (session != null) {
+            viewModel.setSession(session)
+        } else {
+            viewModel.addErrorMessage("Sessão SSH não encontrada")
+        }
+    }
 
     // Auto-scroll to bottom when new lines are added
     LaunchedEffect(uiState.outputLines.size) {

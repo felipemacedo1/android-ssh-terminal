@@ -136,7 +136,7 @@ class TerminalViewModel : ViewModel() {
         }
     }
 
-    private fun addErrorMessage(error: String) {
+    internal fun addErrorMessage(error: String) {
         val timestamp = dateFormat.format(Date())
         error.lines().forEach { line ->
             _uiState.update {
