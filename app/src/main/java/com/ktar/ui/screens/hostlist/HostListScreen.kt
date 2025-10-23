@@ -17,6 +17,7 @@ import com.ktar.data.model.Host
 import com.ktar.ui.components.ConfirmDialog
 import com.ktar.ui.components.ErrorDialog
 import com.ktar.ui.components.HostCard
+import com.ktar.ui.components.KTARHeader
 
 /**
  * Host list screen wrapper for navigation.
@@ -115,23 +116,30 @@ fun HostListScreenContent(
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
                     ) {
-                        Text(
-                            text = stringResource(R.string.host_list_empty),
-                            style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = onAddHost) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = null
+                        KTARHeader()
+                        
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.host_list_empty),
+                                style = MaterialTheme.typography.titleLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(stringResource(R.string.host_list_add_connection))
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Button(onClick = onAddHost) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = null
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(stringResource(R.string.host_list_add_connection))
+                            }
                         }
                     }
                 }
@@ -139,9 +147,12 @@ fun HostListScreenContent(
                 is HostListUiState.Success -> {
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
+                        contentPadding = PaddingValues(bottom = 16.dp),
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        item {
+                            KTARHeader()
+                        }
                         items(state.hosts, key = { it.id }) { host ->
                             HostCard(
                                 host = host,
@@ -150,7 +161,8 @@ fun HostListScreenContent(
                                     onHostClick(host)
                                 },
                                 onEdit = { onEditHost(host) },
-                                onDelete = { hostToDelete = host }
+                                onDelete = { hostToDelete = host },
+                                modifier = Modifier.padding(horizontal = 16.dp)
                             )
                         }
                     }

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Terminal Theme Colors -->
+    <color name="terminal_background">#0A0F14</color>
+    <color name="terminal_green">#5CFCCC</color>
+    <color name="terminal_cyan">#5CFCCC</color>
+    <color name="terminal_text">#E6E1DC</color>
+    
+    <!-- Material Colors -->
+    <color name="primary">#5CFCCC</color>
+    <color name="primary_dark">#0A0F14</color>
+    <color name="accent">#5CFCCC</color>
+</resources>

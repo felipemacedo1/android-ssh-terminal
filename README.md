@@ -1,4 +1,8 @@
-# KTAR
+<p align="center">
+  <img src="./ktar-logo.png" width="120" alt="KTAR Logo"/>
+</p>
+
+# >_KTAR
 
 ⚡ **KTAR – in a SSH connection.**
 
