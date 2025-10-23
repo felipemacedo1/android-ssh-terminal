@@ -14,5 +14,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AndroidSSHTerminal"
+rootProject.name = "KTAR"
 include(":app")

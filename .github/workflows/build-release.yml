@@ -1,0 +1,66 @@
+name: Build and Release APK
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        
+    - name: Cache Gradle packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.gradle/caches
+          ~/.gradle/wrapper
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        restore-keys: |
+          ${{ runner.os }}-gradle-
+          
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+      
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+      
+    - name: Upload APK
+      uses: actions/upload-artifact@v3
+      with:
+        name: ktar-debug
+        path: app/build/outputs/apk/debug/app-debug.apk
+        
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: app/build/outputs/apk/debug/app-debug.apk
+        name: Android SSH Terminal ${{ github.ref_name }}
+        body: |
+          ## 📱 Download e Instalação
+          
+          1. Baixe o arquivo `app-debug.apk`
+          2. No seu dispositivo Android, vá em **Configurações > Segurança**
+          3. Habilite **Fontes desconhecidas** ou **Instalar apps desconhecidos**
+          4. Abra o arquivo APK baixado e toque em **Instalar**
+          
+          ## ⚠️ Requisitos
+          - Android 8.0 (API 26) ou superior
+          - Permissão para instalar apps de fontes desconhecidas
+          
+          ## 🔐 Segurança
+          Este APK é compilado automaticamente pelo GitHub Actions e é seguro para instalação.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

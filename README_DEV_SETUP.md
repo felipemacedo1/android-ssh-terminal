@@ -1,6 +1,6 @@
 # Guia de Configuração do Ambiente de Desenvolvimento
 
-Este documento fornece instruções detalhadas para configurar o ambiente de desenvolvimento do Android SSH Terminal.
+Este documento fornece instruções detalhadas para configurar o ambiente de desenvolvimento do KTAR.
 
 ## 📋 Pré-requisitos
 
@@ -40,14 +40,14 @@ Este documento fornece instruções detalhadas para configurar o ambiente de des
 ### 1. Clonar o Repositório
 
 ```bash
-git clone https://github.com/felipemacedo1/android-ssh-terminal.git
-cd android-ssh-terminal
+git clone https://github.com/felipemacedo1/ktar.git
+cd ktar
 ```
 
 ### 2. Abrir no Android Studio
 
 1. Abra o Android Studio
-2. File → Open → Selecione a pasta `android-ssh-terminal`
+2. File → Open → Selecione a pasta `ktar`
 3. Aguarde a sincronização do Gradle (primeira vez pode demorar)
 
 ### 3. Configurar Android SDK
@@ -156,7 +156,7 @@ Este comando deve:
 ./gradlew installDebug
 
 # Executar
-adb shell am start -n com.felipemacedo.androidsshterminal/.MainActivity
+adb shell am start -n com.ktar/.MainActivity
 ```
 
 ## 🧪 Executando Testes
@@ -267,7 +267,7 @@ Para builds de produção, configure um keystore:
 ```bash
 keytool -genkey -v -keystore release-keystore.jks \
   -keyalg RSA -keysize 2048 -validity 10000 \
-  -alias android-ssh-terminal
+  -alias ktar
 ```
 
 ### 2. Configurar gradle.properties
@@ -277,7 +277,7 @@ Crie `gradle.properties` local (não commitado):
 ```properties
 KEYSTORE_FILE=/caminho/completo/para/release-keystore.jks
 KEYSTORE_PASSWORD=sua_senha_do_keystore
-KEY_ALIAS=android-ssh-terminal
+KEY_ALIAS=ktar
 KEY_PASSWORD=sua_senha_da_chave
 ```
 
@@ -474,8 +474,8 @@ git pull
 
 ## 🆘 Precisa de Ajuda?
 
-- Abra uma [issue no GitHub](https://github.com/felipemacedo1/android-ssh-terminal/issues)
-- Consulte as [discussões do projeto](https://github.com/felipemacedo1/android-ssh-terminal/discussions)
+- Abra uma [issue no GitHub](https://github.com/felipemacedo1/ktar/issues)
+- Consulte as [discussões do projeto](https://github.com/felipemacedo1/ktar/discussions)
 - Email: contato.dev.macedo@gmail.com
 
 ---

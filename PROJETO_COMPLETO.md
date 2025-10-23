@@ -1,4 +1,4 @@
-# 🎉 Android SSH Terminal - Implementação Completa
+# 🎉 KTAR - Implementação Completa
 
 ## ✅ Status do Projeto
 
@@ -213,8 +213,8 @@ Estrutura de testes criada em `app/src/test/`:
 ### Build
 ```bash
 # Clone o repositório
-git clone https://github.com/felipemacedo1/android-ssh-terminal.git
-cd android-ssh-terminal
+git clone https://github.com/felipemacedo1/ktar.git
+cd ktar
 
 # Build debug APK
 ./gradlew assembleDebug
@@ -280,7 +280,7 @@ cd android-ssh-terminal
 Commit principal seguiu o padrão Conventional Commits:
 
 ```
-feat: implementação completa do Android SSH Terminal MVP
+feat: implementação completa do KTAR MVP
 ```
 
 Inclui:
@@ -339,8 +339,8 @@ Insertions: 4,102
 
 ## 📞 Suporte e Contato
 
-- **GitHub**: [felipemacedo1/android-ssh-terminal](https://github.com/felipemacedo1/android-ssh-terminal)
-- **Issues**: https://github.com/felipemacedo1/android-ssh-terminal/issues
+- **GitHub**: [felipemacedo1/ktar](https://github.com/felipemacedo1/ktar)
+- **Issues**: https://github.com/felipemacedo1/ktar/issues
 - **Documentação**: README.md e README_DEV_SETUP.md
 
 ---
@@ -403,7 +403,7 @@ Insertions: 4,102
 
 ## 🎉 Conclusão
 
-O **Android SSH Terminal** foi implementado com sucesso seguindo todas as especificações do projeto. O MVP está completo, funcional, seguro e pronto para uso.
+O **KTAR** foi implementado com sucesso seguindo todas as especificações do projeto. O MVP está completo, funcional, seguro e pronto para uso.
 
 O código é profissional, bem documentado e segue as melhores práticas de desenvolvimento Android moderno.
 

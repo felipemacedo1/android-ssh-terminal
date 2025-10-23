@@ -1,8 +1,12 @@
-# Android SSH Terminal
+# KTAR
+
+⚡ **KTAR – in a SSH connection.**
 
 [![Android](https://img.shields.io/badge/Platform-Android-green.svg)](https://www.android.com/)
 [![Kotlin](https://img.shields.io/badge/Language-Kotlin-blue.svg)](https://kotlinlang.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Release](https://img.shields.io/github/v/release/felipemacedo1/ktar)](https://github.com/felipemacedo1/ktar/releases)
+[![Downloads](https://img.shields.io/github/downloads/felipemacedo1/ktar/total)](https://github.com/felipemacedo1/ktar/releases)
 
 Um aplicativo Android profissional e seguro para conexão SSH a servidores remotos, com interface moderna em Jetpack Compose e autenticação robusta.
 
@@ -46,7 +50,7 @@ _(Em breve - adicionarei screenshots)_
 ## 🏗️ Estrutura do Projeto
 
 ```
-app/src/main/java/com/felipemacedo/androidsshterminal/
+app/src/main/java/com/ktar/
 ├── data/
 │   ├── datastore/          # DataStore para persistência
 │   │   └── HostDataStore.kt
@@ -74,21 +78,30 @@ app/src/main/java/com/felipemacedo/androidsshterminal/
 └── MainActivity.kt
 ```
 
-## 🚦 Como Usar
+## 📱 Download e Instalação
 
-### Instalação
+### Para Usuários Finais
+
+**📥 [Baixar APK](https://github.com/felipemacedo1/ktar/releases/latest)**
+
+1. Baixe o arquivo `app-debug.apk` da página de releases
+2. Habilite "Fontes desconhecidas" nas configurações do Android
+3. Instale o APK baixado
+4. Veja o [guia completo de instalação](INSTALL.md) para mais detalhes
+
+### Para Desenvolvedores
 
 1. Clone o repositório:
 ```bash
-git clone https://github.com/felipemacedo1/android-ssh-terminal.git
-cd android-ssh-terminal
+git clone https://github.com/felipemacedo1/ktar.git
+cd ktar
 ```
 
 2. Abra o projeto no Android Studio
-
 3. Sincronize as dependências do Gradle
-
 4. Execute o app em um dispositivo ou emulador Android
+
+## 🚦 Como Usar
 
 ### Primeiro Uso
 
