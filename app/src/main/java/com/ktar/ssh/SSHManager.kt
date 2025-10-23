@@ -23,6 +23,11 @@ class SSHManager {
     companion object {
         private const val CONNECTION_TIMEOUT_MS = 10000
         private const val COMMAND_TIMEOUT_MS = 30000
+        
+        init {
+            // Initialize BouncyCastle provider
+            SecurityProviderInitializer.initialize()
+        }
     }
 
     /**
