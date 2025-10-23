@@ -119,3 +119,7 @@ Thumbs.db
 /.idea/workspace.xml
 /.idea/navEditor.xml
 /.idea/assetWizardSettings.xml
+# Documentation not to be versioned (setup guides, private notes)
+SSH_SERVER_SETUP.md
+SETUP_*.md
+*_SETUP_GUIDE.md
