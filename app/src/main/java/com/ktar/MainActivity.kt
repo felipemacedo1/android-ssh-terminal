@@ -19,6 +19,8 @@ import com.ktar.ui.screens.connection.ConnectionScreen
 import com.ktar.ui.screens.connection.ConnectionViewModel
 import com.ktar.ui.screens.hostlist.HostListScreen
 import com.ktar.ui.screens.hostlist.HostListViewModel
+import com.ktar.ui.screens.sftp.SFTPScreen
+import com.ktar.ui.screens.sftp.SFTPViewModel
 import com.ktar.ui.screens.terminal.TerminalScreen
 import com.ktar.ui.screens.terminal.TerminalViewModel
 import com.ktar.ui.theme.AndroidSSHTerminalTheme
@@ -112,6 +114,25 @@ class MainActivity : ComponentActivity() {
                             val terminalViewModel: TerminalViewModel = viewModel(factory = viewModelFactory)
                             TerminalScreen(
                                 viewModel = terminalViewModel,
+                                sessionId = sessionId,
+                                onNavigateBack = {
+                                    navController.popBackStack()
+                                },
+                                onNavigateToSFTP = { sftpSessionId ->
+                                    navController.navigate("sftp/$sftpSessionId")
+                                }
+                            )
+                        }
+
+                        // SFTP screen
+                        composable(
+                            route = "sftp/{sessionId}",
+                            arguments = listOf(navArgument("sessionId") { type = NavType.StringType })
+                        ) { backStackEntry ->
+                            val sessionId = backStackEntry.arguments?.getString("sessionId") ?: ""
+                            val sftpViewModel: SFTPViewModel = viewModel(factory = viewModelFactory)
+                            SFTPScreen(
+                                viewModel = sftpViewModel,
                                 sessionId = sessionId,
                                 onNavigateBack = {
                                     navController.popBackStack()

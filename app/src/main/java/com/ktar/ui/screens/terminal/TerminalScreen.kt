@@ -11,6 +11,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -41,7 +42,8 @@ import kotlinx.coroutines.launch
 fun TerminalScreen(
     viewModel: TerminalViewModel,
     sessionId: String,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToSFTP: (String) -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
@@ -87,6 +89,16 @@ fun TerminalScreen(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
                     ) {
+                        DropdownMenuItem(
+                            text = { Text("SFTP Manager") },
+                            onClick = {
+                                onNavigateToSFTP(sessionId)
+                                showMenu = false
+                            },
+                            leadingIcon = {
+                                Icon(Icons.Default.Folder, contentDescription = null)
+                            }
+                        )
                         DropdownMenuItem(
                             text = { Text("Limpar Terminal") },
                             onClick = {

@@ -68,8 +68,19 @@
      * Erros (vermelho)
      * Sistema (secundário)
    - Input de comando com prompt `$`
-   - Menu para limpar terminal
+   - Menu para limpar terminal e acessar SFTP
    - Comando `exit` para desconectar
+   - Navegação direta para SFTP Manager
+
+4. **SFTPScreen** (`ui/screens/sftp/`) - NOVO v1.2.0
+   - Listagem de arquivos e diretórios remotos
+   - Upload de arquivos locais
+   - Download de arquivos remotos
+   - Navegação de diretórios
+   - Indicador de progresso em tempo real
+   - Exibição de permissões, tamanho e data
+   - Reutiliza sessão SSH ativa
+   - Storage Access Framework para Android 13+
 
 #### Componentes Reutilizáveis:
 - `Dialogs.kt`:
@@ -82,6 +93,7 @@
 - **HostListViewModel** - Gerencia lista de hosts
 - **ConnectionViewModel** - Gerencia formulário e conexão
 - **TerminalViewModel** - Gerencia terminal e execução de comandos
+- **SFTPViewModel** - Gerencia operações SFTP (v1.2.0)
 - Uso de StateFlow e Coroutines
 - Arquitetura MVVM
 

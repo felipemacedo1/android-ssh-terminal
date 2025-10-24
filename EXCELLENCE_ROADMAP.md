@@ -251,11 +251,11 @@ perf: otimiza renderização do terminal
 - Correção de warnings
 - Testes unitários básicos
 
-### v1.2.0
-- SFTP básico
-- Snippets de comandos
-- Temas personalizáveis
-- Biometria
+### v1.2.0 ✅
+- ✅ SFTP completo (upload/download)
+- ⏳ Snippets de comandos
+- ⏳ Temas personalizáveis
+- ⏳ Biometria
 
 ### v2.0.0
 - Múltiplas sessões simultâneas

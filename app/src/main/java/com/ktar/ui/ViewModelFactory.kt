@@ -6,8 +6,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.ktar.data.datastore.HostDataStore
 import com.ktar.data.security.SecurityManager
 import com.ktar.ssh.SSHManager
+import com.ktar.ssh.SessionManager
 import com.ktar.ui.screens.connection.ConnectionViewModel
 import com.ktar.ui.screens.hostlist.HostListViewModel
+import com.ktar.ui.screens.sftp.SFTPViewModel
 import com.ktar.ui.screens.terminal.TerminalViewModel
 
 /**
@@ -20,6 +22,7 @@ class ViewModelFactory(
     private val hostDataStore by lazy { HostDataStore(context) }
     private val securityManager by lazy { SecurityManager() }
     private val sshManager by lazy { SSHManager() }
+    private val sessionManager = SessionManager
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -32,6 +35,9 @@ class ViewModelFactory(
             }
             modelClass.isAssignableFrom(TerminalViewModel::class.java) -> {
                 TerminalViewModel() as T
+            }
+            modelClass.isAssignableFrom(SFTPViewModel::class.java) -> {
+                SFTPViewModel(sessionManager) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }

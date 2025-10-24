@@ -14,6 +14,9 @@ adb logcat *:E | grep -A 50 "FATAL EXCEPTION"
 # Logs específicos do SSH
 adb logcat | grep -E "SSHTerminal|SSH_CONNECTION|SSH_COMMAND|SECURITY"
 
+# Logs específicos do SFTP
+adb logcat | grep -E "SFTP_UPLOAD|SFTP_DOWNLOAD|SFTP_LIST|SFTP"
+
 # Logs com timestamps
 adb logcat -v time | grep -E "androidsshterminal"
 ```
