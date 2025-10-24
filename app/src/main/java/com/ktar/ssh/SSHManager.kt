@@ -123,10 +123,11 @@ class SSHManager {
      *
      * @param session Active SSH session
      * @param command Command to execute
+     * @param usePTY Whether to allocate a pseudo-terminal
      * @return CommandResult with output and exit code
      */
-    suspend fun executeCommand(session: SSHSession, command: String): CommandResult {
-        return session.executeCommand(command)
+    suspend fun executeCommand(session: SSHSession, command: String, usePTY: Boolean = false): CommandResult {
+        return session.executeCommand(command, usePTY)
     }
 
     /**
@@ -163,9 +164,10 @@ class SSHSession(
      * Executes a single command and returns the result.
      *
      * @param command Command to execute
+     * @param usePTY Whether to allocate a pseudo-terminal (for interactive commands)
      * @return CommandResult with output and exit code
      */
-    suspend fun executeCommand(command: String): CommandResult = withContext(Dispatchers.IO) {
+    suspend fun executeCommand(command: String, usePTY: Boolean = false): CommandResult = withContext(Dispatchers.IO) {
         if (!isConnected()) {
             return@withContext CommandResult(
                 success = false,
@@ -178,6 +180,13 @@ class SSHSession(
         var session: Session? = null
         try {
             session = client.startSession()
+            
+            // Allocate PTY if requested (for interactive commands like vi, top, etc.)
+            if (usePTY) {
+                session.allocateDefaultPTY()
+                android.util.Log.d("SSH_PTY", "PTY allocated for command: $command")
+            }
+            
             val cmd = session.exec(command)
 
             // Read output
@@ -210,6 +219,20 @@ class SSHSession(
         } finally {
             session?.close()
         }
+    }
+    
+    /**
+     * Checks if a command requires an interactive PTY session.
+     * Common interactive commands that need PTY.
+     */
+    fun isInteractiveCommand(command: String): Boolean {
+        val interactiveCommands = listOf(
+            "vi", "vim", "nano", "emacs",
+            "top", "htop", "less", "more",
+            "man", "ssh", "telnet", "screen", "tmux"
+        )
+        val cmd = command.trim().split(" ").firstOrNull()?.lowercase() ?: return false
+        return interactiveCommands.contains(cmd)
     }
 
     /**

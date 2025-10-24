@@ -14,6 +14,7 @@ Documentação técnica e guias de uso do KTAR - Android SSH Terminal.
 
 ### ✨ Features
 - **[SFTP_GUIDE.md](SFTP_GUIDE.md)** - Guia completo da feature SFTP (upload/download)
+- **[PTY_GUIDE.md](PTY_GUIDE.md)** - Guia do modo interativo PTY (comandos como vi, top, nano)
 
 ## 🎯 Links Rápidos
 
@@ -21,6 +22,7 @@ Documentação técnica e guias de uso do KTAR - Android SSH Terminal.
 - Quer instalar? → [INSTALL.md](INSTALL.md)
 - Precisa de um servidor SSH? → [SSH_SERVER_SETUP.md](SSH_SERVER_SETUP.md)
 - Como usar SFTP? → [SFTP_GUIDE.md](SFTP_GUIDE.md)
+- Como usar modo PTY (interativo)? → [PTY_GUIDE.md](PTY_GUIDE.md)
 
 ### Para Desenvolvedores
 - Como debugar? → [DEBUG_GUIDE.md](DEBUG_GUIDE.md)
@@ -38,6 +40,7 @@ ktar/
 │   ├── DEBUG_GUIDE.md     # Debug
 │   ├── TESTING_GUIDE.md   # Testes
 │   ├── SFTP_GUIDE.md      # SFTP
+│   ├── PTY_GUIDE.md       # PTY (modo interativo)
 │   └── SSH_SERVER_SETUP.md # Setup SSH
 ├── app/                   # Código-fonte Android
 └── ...

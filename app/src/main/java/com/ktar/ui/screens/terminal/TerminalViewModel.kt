@@ -1,5 +1,6 @@
 package com.ktar.ui.screens.terminal
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ktar.data.model.CommandResult
@@ -15,6 +16,7 @@ import java.util.*
 
 /**
  * ViewModel for the terminal screen.
+ * Supports both standard command execution and PTY (interactive) mode.
  */
 class TerminalViewModel : ViewModel() {
 
@@ -26,6 +28,10 @@ class TerminalViewModel : ViewModel() {
 
     private val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
 
+    companion object {
+        private const val TAG = "TerminalViewModel"
+    }
+
     /**
      * Sets the active SSH session.
      */
@@ -33,6 +39,23 @@ class TerminalViewModel : ViewModel() {
         sshSession = session
         addSystemMessage("Conectado a ${session.host.host}:${session.host.port} como ${session.host.username}")
         addSystemMessage("Digite 'exit' para desconectar")
+    }
+
+    /**
+     * Toggles PTY (interactive) mode.
+     */
+    fun togglePTYMode() {
+        _uiState.update { 
+            val newValue = !it.ptyEnabled
+            Log.d(TAG, "PTY mode toggled: $newValue")
+            it.copy(ptyEnabled = newValue) 
+        }
+        
+        if (_uiState.value.ptyEnabled) {
+            addSystemMessage("⚙️ Modo interativo (PTY) ativado - comandos como vi, top, nano funcionarão")
+        } else {
+            addSystemMessage("⚙️ Modo padrão ativado - execução não interativa")
+        }
     }
 
     /**
@@ -67,12 +90,26 @@ class TerminalViewModel : ViewModel() {
         // Add command to output
         addCommandMessage(command)
 
+        // Check if command requires PTY and warn user
+        if (!_uiState.value.ptyEnabled && session.isInteractiveCommand(command)) {
+            addSystemMessage("⚠️ O comando '$command' pode requerer modo interativo (PTY)")
+            addSystemMessage("   Ative o modo interativo no menu se o comando não funcionar corretamente")
+        }
+
         // Execute command
         _uiState.update { it.copy(isExecuting = true) }
 
         viewModelScope.launch {
             try {
-                val result = sshManager.executeCommand(session, command)
+                val usePTY = _uiState.value.ptyEnabled
+                
+                if (usePTY) {
+                    Log.d("SSH_PTY", "Executing command with PTY: $command")
+                } else {
+                    Log.d("SSH_EXEC", "Executing command: $command")
+                }
+                
+                val result = sshManager.executeCommand(session, command, usePTY)
                 
                 if (result.success) {
                     if (result.output.isNotEmpty()) {
@@ -85,6 +122,7 @@ class TerminalViewModel : ViewModel() {
                     addErrorMessage(result.error.ifEmpty { "Comando falhou com código ${result.exitCode}" })
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Error executing command", e)
                 addErrorMessage("Erro ao executar comando: ${e.message}")
             } finally {
                 _uiState.update { it.copy(isExecuting = false) }
@@ -168,7 +206,8 @@ data class TerminalUiState(
     val currentCommand: String = "",
     val isExecuting: Boolean = false,
     val isConnected: Boolean = true,
-    val prompt: String = "$ "
+    val prompt: String = "$ ",
+    val ptyEnabled: Boolean = false  // PTY (interactive) mode enabled
 )
 
 /**

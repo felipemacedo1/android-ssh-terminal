@@ -10,9 +10,11 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -89,6 +91,27 @@ fun TerminalScreen(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
                     ) {
+                        DropdownMenuItem(
+                            text = { 
+                                Row(
+                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+                                ) {
+                                    Text(if (uiState.ptyEnabled) "✓ " else "  ")
+                                    Text("Modo Interativo (PTY)")
+                                }
+                            },
+                            onClick = {
+                                viewModel.togglePTYMode()
+                                showMenu = false
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = if (uiState.ptyEnabled) Icons.Default.CheckCircle else Icons.Default.Terminal,
+                                    contentDescription = null,
+                                    tint = if (uiState.ptyEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                        )
                         DropdownMenuItem(
                             text = { Text("SFTP Manager") },
                             onClick = {

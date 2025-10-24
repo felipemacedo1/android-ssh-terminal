@@ -17,6 +17,9 @@ adb logcat | grep -E "SSHTerminal|SSH_CONNECTION|SSH_COMMAND|SECURITY"
 # Logs específicos do SFTP
 adb logcat | grep -E "SFTP_UPLOAD|SFTP_DOWNLOAD|SFTP_LIST|SFTP"
 
+# Logs específicos do PTY (modo interativo)
+adb logcat | grep -E "SSH_PTY|SSH_EXEC|SSH_IO"
+
 # Logs com timestamps
 adb logcat -v time | grep -E "androidsshterminal"
 ```
