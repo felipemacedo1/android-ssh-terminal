@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">KTAR</string>
     
-    <color name="ic_launcher_background">#2196F3</color>
+    <color name="ic_launcher_background">#0D1117</color>
     
     <!-- Host List Screen -->
     <string name="host_list_title">SSH Connections</string>
