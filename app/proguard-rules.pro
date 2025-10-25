@@ -8,6 +8,8 @@
 # Keep SSHJ classes
 -keep class net.schmizz.** { *; }
 -keep class com.hierynomus.** { *; }
+-dontwarn net.schmizz.**
+-dontwarn com.hierynomus.**
 
 # Keep BouncyCastle
 -keep class org.bouncycastle.** { *; }
@@ -16,6 +18,15 @@
 # Keep SLF4J
 -keep class org.slf4j.** { *; }
 -dontwarn org.slf4j.**
+
+# Keep GSSAPI classes (optional dependencies)
+-dontwarn javax.security.auth.login.**
+-dontwarn org.ietf.jgss.**
+-dontwarn sun.security.x509.**
+
+# Keep EdDSA classes
+-keep class net.i2p.crypto.eddsa.** { *; }
+-dontwarn net.i2p.crypto.eddsa.**
 
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
