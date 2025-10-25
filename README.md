@@ -26,7 +26,10 @@ Um aplicativo Android profissional e seguro para conexão SSH a servidores remot
 
 - ✅ **Conexões SSH seguras** usando [SSHJ](https://github.com/hierynomus/sshj)
 - ✅ **Autenticação múltipla**: senha ou chave pública (RSA/ED25519)
-- ✅ **Terminal interativo** com histórico de comandos
+- ✅ **Terminal SSH real** com shell persistente e PTY (v1.4.0)
+- ✅ **Output em tempo real** via streaming adaptativo
+- ✅ **Estado persistente** - comandos cd, export, variáveis mantidos
+- ✅ **Comandos longos** - tail -f, top -b, watch funcionam
 - ✅ **Persistência de hosts** com DataStore
 - ✅ **Criptografia de credenciais** via Android Keystore (AES-GCM)
 - ✅ **Interface Material 3** com tema dark/light
@@ -206,14 +209,40 @@ Este projeto usa [Conventional Commits](https://www.conventionalcommits.org/):
 
 ## 📝 Roadmap
 
+### ✅ v1.4.0 - Terminal PTY Real (Concluído)
+- ✅ Shell persistente com PTY
+- ✅ Output streaming em tempo real
+- ✅ Estado mantido entre comandos (cd, export)
+- ✅ Comandos longos suportados (tail -f, top -b)
+- ✅ Buffer gerenciado (10k linhas)
+- ✅ Polling adaptativo para economia de bateria
+
+### 🔜 Próximas Versões
+
+#### v1.5.0 - Teclas Especiais (Planejado)
+- [ ] Suporte a setas ↑↓ (histórico de comandos)
+- [ ] Backspace e edição de linha
+- [ ] Ctrl+C para interromper comandos
+- [ ] Tab completion
+
+#### v1.6.0 - Parser ANSI (Planejado)
+- [ ] Cores ANSI no terminal
+- [ ] Formatação (negrito, itálico)
+- [ ] Clear screen suportado
+- [ ] Posicionamento de cursor
+
+#### v2.0.0 - Terminal Completo (Visão)
+- [ ] Editores full-screen (vi, vim, nano)
+- [ ] Múltiplas abas/sessões
+- [ ] Snippet manager
+- [ ] Gravação de sessões
+
+### Outras Features
 - [ ] Suporte a SFTP para transferência de arquivos
 - [ ] SSH tunneling (port forwarding)
-- [ ] Snippets de comandos favoritos
 - [ ] Exportar/importar configurações
-- [ ] Suporte a múltiplos perfis
 - [ ] Widget para acesso rápido
 - [ ] Temas customizáveis
-- [ ] Gravação de sessões
 
 ## 📄 Licença
 

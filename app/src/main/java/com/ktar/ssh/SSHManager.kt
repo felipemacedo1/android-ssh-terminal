@@ -264,18 +264,36 @@ class SSHSession(
     }
 
     /**
-     * Reads output from the shell.
+     * Reads output from the shell without blocking.
      *
      * @param maxBytes Maximum bytes to read
-     * @return Output string
+     * @return Output string (empty if no data available)
      */
     suspend fun readFromShell(maxBytes: Int = 8192): String = withContext(Dispatchers.IO) {
-        val channel = shellChannel ?: throw IllegalStateException("Shell not started")
-        val buffer = ByteArray(maxBytes)
-        val bytesRead = channel.inputStream.read(buffer)
-        if (bytesRead > 0) {
-            String(buffer, 0, bytesRead, Charsets.UTF_8)
-        } else {
+        val channel = shellChannel ?: return@withContext ""
+        val inputStream = channel.inputStream
+        
+        try {
+            // Check if data is available (non-blocking)
+            val available = inputStream.available()
+            if (available <= 0) {
+                return@withContext ""
+            }
+            
+            // Read only what's available
+            val bytesToRead = minOf(available, maxBytes)
+            val buffer = ByteArray(bytesToRead)
+            val bytesRead = inputStream.read(buffer, 0, bytesToRead)
+            
+            if (bytesRead > 0) {
+                val output = String(buffer, 0, bytesRead, Charsets.UTF_8)
+                android.util.Log.v("SSH_READ", "Available: $available bytes, Read: $bytesRead bytes")
+                output
+            } else {
+                ""
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SSHSession", "Error reading from shell", e)
             ""
         }
     }

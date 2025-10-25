@@ -6,17 +6,22 @@ import androidx.lifecycle.viewModelScope
 import com.ktar.data.model.CommandResult
 import com.ktar.ssh.SSHManager
 import com.ktar.ssh.SSHSession
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
 /**
  * ViewModel for the terminal screen.
- * Supports both standard command execution and PTY (interactive) mode.
+ * Supports both standard command execution (exec) and persistent shell mode (PTY).
+ * 
+ * v1.4.0: Added persistent shell with real-time streaming output.
  */
 class TerminalViewModel : ViewModel() {
 
@@ -27,24 +32,143 @@ class TerminalViewModel : ViewModel() {
     private val sshManager = SSHManager()
 
     private val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+    
+    // Persistent shell support
+    private var outputPollingJob: Job? = null
+    private var pollInterval = 100L // Adaptive polling interval
 
     companion object {
         private const val TAG = "TerminalViewModel"
+        private const val MAX_OUTPUT_LINES = 10000
+        private const val MIN_POLL_INTERVAL = 50L
+        private const val MAX_POLL_INTERVAL = 500L
     }
 
     /**
-     * Sets the active SSH session.
+     * Sets the active SSH session and starts persistent interactive shell.
      */
-    fun setSession(session: SSHSession) {
+    fun setSession(session: SSHSession, useShellMode: Boolean = true) {
         sshSession = session
-        addSystemMessage("Conectado a ${session.host.host}:${session.host.port} como ${session.host.username}")
-        addSystemMessage("Digite 'exit' para desconectar")
+        
+        if (useShellMode) {
+            // Start persistent shell with PTY
+            viewModelScope.launch {
+                try {
+                    session.startShell()
+                    Log.d(TAG, "Persistent interactive shell started with PTY")
+                    
+                    // Wait for shell initialization
+                    delay(500)
+                    
+                    // Start output polling
+                    startOutputPolling()
+                    
+                    _uiState.update { 
+                        it.copy(
+                            isConnected = true, 
+                            shellMode = true,
+                            ptyEnabled = true
+                        ) 
+                    }
+                    
+                    addSystemMessage("✅ Conectado a ${session.host.host}:${session.host.port} como ${session.host.username}")
+                    addSystemMessage("🔧 Shell interativo ativo - Terminal PTY habilitado")
+                    addSystemMessage("💡 Digite 'exit' para desconectar")
+                    
+                    // Read and display initial output (banner, MOTD)
+                    delay(200)
+                    readInitialOutput()
+                    
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error starting shell", e)
+                    addErrorMessage("❌ Erro ao iniciar shell interativo: ${e.message}")
+                    addSystemMessage("⚠️ Revertendo para modo exec padrão")
+                    _uiState.update { it.copy(isConnected = true, shellMode = false) }
+                }
+            }
+        } else {
+            // Legacy exec mode
+            _uiState.update { it.copy(isConnected = true, shellMode = false) }
+            addSystemMessage("Conectado a ${session.host.host}:${session.host.port} como ${session.host.username}")
+            addSystemMessage("Digite 'exit' para desconectar")
+        }
+    }
+    
+    /**
+     * Starts continuous polling of shell output with adaptive interval.
+     */
+    private fun startOutputPolling() {
+        outputPollingJob?.cancel()
+        
+        outputPollingJob = viewModelScope.launch {
+            var emptyReadCount = 0
+            
+            while (isActive) {
+                try {
+                    val output = sshSession?.readFromShell()
+                    
+                    if (!output.isNullOrEmpty()) {
+                        addOutputMessage(output)
+                        emptyReadCount = 0
+                        
+                        // Speed up polling when active
+                        pollInterval = maxOf(MIN_POLL_INTERVAL, pollInterval - 10)
+                        Log.v("SSH_POLL", "Active output - interval: ${pollInterval}ms, bytes: ${output.length}")
+                    } else {
+                        emptyReadCount++
+                        
+                        // Slow down polling when idle
+                        if (emptyReadCount > 5) {
+                            pollInterval = minOf(MAX_POLL_INTERVAL, pollInterval + 20)
+                        }
+                    }
+                    
+                    delay(pollInterval)
+                    
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error reading shell output", e)
+                    delay(1000) // Back off on error
+                }
+            }
+        }
+        
+        Log.d(TAG, "Output polling started")
+    }
+    
+    /**
+     * Stops output polling.
+     */
+    private fun stopOutputPolling() {
+        outputPollingJob?.cancel()
+        outputPollingJob = null
+        Log.d(TAG, "Output polling stopped")
+    }
+    
+    /**
+     * Reads and displays initial shell output (banner, MOTD).
+     */
+    private suspend fun readInitialOutput() {
+        try {
+            val initialOutput = sshSession?.readFromShell(maxBytes = 16384)
+            if (!initialOutput.isNullOrEmpty()) {
+                addOutputMessage(initialOutput)
+                Log.d(TAG, "Initial output read: ${initialOutput.length} bytes")
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "Error reading initial output", e)
+        }
     }
 
     /**
      * Toggles PTY (interactive) mode.
+     * In shell mode, this has no effect as PTY is always enabled.
      */
     fun togglePTYMode() {
+        if (_uiState.value.shellMode) {
+            addSystemMessage("ℹ️ Shell interativo está sempre com PTY habilitado")
+            return
+        }
+        
         _uiState.update { 
             val newValue = !it.ptyEnabled
             Log.d(TAG, "PTY mode toggled: $newValue")
@@ -67,6 +191,7 @@ class TerminalViewModel : ViewModel() {
 
     /**
      * Executes the current command.
+     * Uses persistent shell if in shell mode, otherwise falls back to exec.
      */
     fun executeCommand() {
         val command = _uiState.value.currentCommand.trim()
@@ -83,10 +208,48 @@ class TerminalViewModel : ViewModel() {
             disconnect()
             return
         }
+        
+        // Handle clear command
+        if (command.equals("clear", ignoreCase = true)) {
+            clearTerminal()
+            _uiState.update { it.copy(currentCommand = "") }
+            return
+        }
 
         // Clear input
         _uiState.update { it.copy(currentCommand = "") }
 
+        if (_uiState.value.shellMode) {
+            // Shell mode: send to persistent shell
+            executeCommandInShell(session, command)
+        } else {
+            // Exec mode: traditional one-shot execution
+            executeCommandWithExec(session, command)
+        }
+    }
+    
+    /**
+     * Executes command by sending to persistent shell.
+     */
+    private fun executeCommandInShell(session: SSHSession, command: String) {
+        // Add command to output (local echo)
+        addCommandMessage(command)
+        
+        viewModelScope.launch {
+            try {
+                session.sendToShell(command)
+                Log.d("SSH_CMD", "Command sent to shell: $command")
+            } catch (e: Exception) {
+                Log.e(TAG, "Error sending command to shell", e)
+                addErrorMessage("❌ Erro ao enviar comando: ${e.message}")
+            }
+        }
+    }
+    
+    /**
+     * Executes command using traditional exec (legacy mode).
+     */
+    private fun executeCommandWithExec(session: SSHSession, command: String) {
         // Add command to output
         addCommandMessage(command)
 
@@ -131,20 +294,28 @@ class TerminalViewModel : ViewModel() {
     }
 
     /**
-     * Disconnects the SSH session.
+     * Disconnects the SSH session and stops polling.
      */
     fun disconnect() {
+        stopOutputPolling()
+        
         viewModelScope.launch {
             try {
                 sshSession?.let { session ->
                     sshManager.closeSession(session)
-                    addSystemMessage("Desconectado de ${session.host.host}")
+                    addSystemMessage("👋 Desconectado de ${session.host.host}")
                 }
             } catch (e: Exception) {
                 addErrorMessage("Erro ao desconectar: ${e.message}")
             } finally {
                 sshSession = null
-                _uiState.update { it.copy(isConnected = false) }
+                _uiState.update { 
+                    it.copy(
+                        isConnected = false,
+                        shellMode = false,
+                        ptyEnabled = false
+                    ) 
+                }
             }
         }
     }
@@ -154,44 +325,56 @@ class TerminalViewModel : ViewModel() {
      */
     fun clearTerminal() {
         _uiState.update { it.copy(outputLines = emptyList()) }
-        addSystemMessage("Terminal limpo")
+        addSystemMessage("🧹 Terminal limpo")
     }
 
     private fun addCommandMessage(command: String) {
         val timestamp = dateFormat.format(Date())
         val prefix = "${_uiState.value.prompt}$command"
-        _uiState.update {
-            it.copy(outputLines = it.outputLines + TerminalLine(prefix, TerminalLineType.COMMAND, timestamp))
-        }
+        addOutputLine(TerminalLine(prefix, TerminalLineType.COMMAND, timestamp))
     }
 
     private fun addOutputMessage(output: String) {
         val timestamp = dateFormat.format(Date())
         output.lines().forEach { line ->
-            _uiState.update {
-                it.copy(outputLines = it.outputLines + TerminalLine(line, TerminalLineType.OUTPUT, timestamp))
-            }
+            addOutputLine(TerminalLine(line, TerminalLineType.OUTPUT, timestamp))
         }
     }
 
     internal fun addErrorMessage(error: String) {
         val timestamp = dateFormat.format(Date())
         error.lines().forEach { line ->
-            _uiState.update {
-                it.copy(outputLines = it.outputLines + TerminalLine(line, TerminalLineType.ERROR, timestamp))
-            }
+            addOutputLine(TerminalLine(line, TerminalLineType.ERROR, timestamp))
         }
     }
 
     private fun addSystemMessage(message: String) {
         val timestamp = dateFormat.format(Date())
-        _uiState.update {
-            it.copy(outputLines = it.outputLines + TerminalLine(message, TerminalLineType.SYSTEM, timestamp))
+        addOutputLine(TerminalLine(message, TerminalLineType.SYSTEM, timestamp))
+    }
+    
+    /**
+     * Adds output line with buffer management.
+     */
+    private fun addOutputLine(line: TerminalLine) {
+        _uiState.update { state ->
+            val newLines = state.outputLines + line
+            
+            // Limit buffer to prevent memory issues
+            val trimmedLines = if (newLines.size > MAX_OUTPUT_LINES) {
+                Log.d(TAG, "Buffer limit reached, trimming to $MAX_OUTPUT_LINES lines")
+                newLines.takeLast(MAX_OUTPUT_LINES)
+            } else {
+                newLines
+            }
+            
+            state.copy(outputLines = trimmedLines)
         }
     }
 
     override fun onCleared() {
         super.onCleared()
+        stopOutputPolling()
         viewModelScope.launch {
             sshSession?.let { sshManager.closeSession(it) }
         }
@@ -207,7 +390,8 @@ data class TerminalUiState(
     val isExecuting: Boolean = false,
     val isConnected: Boolean = true,
     val prompt: String = "$ ",
-    val ptyEnabled: Boolean = false  // PTY (interactive) mode enabled
+    val ptyEnabled: Boolean = false,  // PTY (interactive) mode enabled (for exec mode)
+    val shellMode: Boolean = false    // Persistent shell mode (PTY always enabled)
 )
 
 /**
