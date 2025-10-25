@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.Terminal
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -74,7 +75,18 @@ fun TerminalScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("SSH Terminal") },
+                title = { 
+                    Column {
+                        Text("SSH Terminal")
+                        if (uiState.hostName.isNotEmpty()) {
+                            Text(
+                                text = uiState.hostName,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
+                },
                 navigationIcon = {
                     IconButton(onClick = {
                         viewModel.disconnect()
@@ -84,6 +96,16 @@ fun TerminalScreen(
                     }
                 },
                 actions = {
+                    // Connection status indicator
+                    if (uiState.isConnected) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Conectado",
+                            tint = Color(0xFF4CAF50), // Green
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                    }
+                    
                     IconButton(onClick = { showMenu = true }) {
                         Icon(Icons.Default.MoreVert, contentDescription = "Menu")
                     }
@@ -91,27 +113,40 @@ fun TerminalScreen(
                         expanded = showMenu,
                         onDismissRequest = { showMenu = false }
                     ) {
+                        // Terminal mode info
                         DropdownMenuItem(
                             text = { 
-                                Row(
-                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                                ) {
-                                    Text(if (uiState.ptyEnabled) "✓ " else "  ")
-                                    Text("Modo Interativo (PTY)")
+                                Column {
+                                    Text(
+                                        text = if (uiState.shellMode) "✓ Shell Persistente" else "Modo Exec",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = if (uiState.shellMode) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Text(
+                                        text = if (uiState.shellMode) "PTY sempre ativo" else "PTY: ${if (uiState.ptyEnabled) "Ativo" else "Inativo"}",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
                             },
                             onClick = {
-                                viewModel.togglePTYMode()
+                                if (!uiState.shellMode) {
+                                    viewModel.togglePTYMode()
+                                }
                                 showMenu = false
                             },
                             leadingIcon = {
                                 Icon(
-                                    imageVector = if (uiState.ptyEnabled) Icons.Default.CheckCircle else Icons.Default.Terminal,
+                                    imageVector = if (uiState.shellMode || uiState.ptyEnabled) Icons.Default.CheckCircle else Icons.Default.Terminal,
                                     contentDescription = null,
-                                    tint = if (uiState.ptyEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                                    tint = if (uiState.shellMode || uiState.ptyEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                                 )
-                            }
+                            },
+                            enabled = !uiState.shellMode // Disable toggle in shell mode
                         )
+                        
+                        Divider()
+                        
                         DropdownMenuItem(
                             text = { Text("SFTP Manager") },
                             onClick = {
@@ -143,6 +178,17 @@ fun TerminalScreen(
                 .padding(padding)
                 .background(MaterialTheme.colorScheme.surface)
         ) {
+            // Terminal Status Bar
+            TerminalStatusBar(
+                shellMode = uiState.shellMode,
+                bufferUsage = uiState.bufferUsage,
+                maxBuffer = 10000,
+                pollInterval = uiState.currentPollInterval,
+                connectionTime = uiState.connectionTime
+            )
+            
+            Divider()
+            
             // Terminal output
             LazyColumn(
                 state = listState,
@@ -286,5 +332,115 @@ private fun TerminalInput(
                 }
             }
         )
+        
+        // Send button
+        IconButton(
+            onClick = onExecute,
+            enabled = enabled && command.isNotEmpty()
+        ) {
+            Icon(
+                imageVector = Icons.Default.Send,
+                contentDescription = "Enviar comando",
+                tint = if (enabled && command.isNotEmpty()) 
+                    MaterialTheme.colorScheme.primary 
+                else 
+                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+            )
+        }
+    }
+}
+
+/**
+ * Terminal status bar showing mode, buffer, and performance info.
+ */
+@Composable
+private fun TerminalStatusBar(
+    shellMode: Boolean,
+    bufferUsage: Int,
+    maxBuffer: Int,
+    pollInterval: Long,
+    connectionTime: Long
+) {
+    val connectionDuration = remember(connectionTime) {
+        if (connectionTime > 0) {
+            val durationMs = System.currentTimeMillis() - connectionTime
+            val minutes = (durationMs / 1000 / 60).toInt()
+            val seconds = ((durationMs / 1000) % 60).toInt()
+            "${minutes}m ${seconds}s"
+        } else {
+            "0s"
+        }
+    }
+    
+    val bufferPercentage = if (maxBuffer > 0) (bufferUsage.toFloat() / maxBuffer * 100).toInt() else 0
+    val bufferColor = when {
+        bufferPercentage < 50 -> Color(0xFF4CAF50) // Green
+        bufferPercentage < 80 -> Color(0xFFFFC107) // Amber
+        else -> Color(0xFFF44336) // Red
+    }
+    
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Left: Mode and status
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = if (shellMode) Icons.Default.CheckCircle else Icons.Default.Terminal,
+                    contentDescription = null,
+                    tint = if (shellMode) Color(0xFF4CAF50) else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(16.dp)
+                )
+                Text(
+                    text = if (shellMode) "Shell Persistente" else "Modo Exec",
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = if (shellMode) androidx.compose.ui.text.font.FontWeight.SemiBold else androidx.compose.ui.text.font.FontWeight.Normal,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            
+            // Right: Stats
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Buffer usage
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Terminal,
+                        contentDescription = null,
+                        tint = bufferColor,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = "$bufferUsage/$maxBuffer",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                
+                // Polling interval (only in shell mode)
+                if (shellMode) {
+                    Text(
+                        text = "⚡${pollInterval}ms",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
     }
 }

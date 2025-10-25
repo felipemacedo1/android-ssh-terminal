@@ -50,6 +50,8 @@ class TerminalViewModel : ViewModel() {
     fun setSession(session: SSHSession, useShellMode: Boolean = true) {
         sshSession = session
         
+        val connectionStartTime = System.currentTimeMillis()
+        
         if (useShellMode) {
             // Start persistent shell with PTY
             viewModelScope.launch {
@@ -67,7 +69,9 @@ class TerminalViewModel : ViewModel() {
                         it.copy(
                             isConnected = true, 
                             shellMode = true,
-                            ptyEnabled = true
+                            ptyEnabled = true,
+                            hostName = "${session.host.username}@${session.host.host}:${session.host.port}",
+                            connectionTime = connectionStartTime
                         ) 
                     }
                     
@@ -88,7 +92,14 @@ class TerminalViewModel : ViewModel() {
             }
         } else {
             // Legacy exec mode
-            _uiState.update { it.copy(isConnected = true, shellMode = false) }
+            _uiState.update { 
+                it.copy(
+                    isConnected = true, 
+                    shellMode = false,
+                    hostName = "${session.host.username}@${session.host.host}:${session.host.port}",
+                    connectionTime = connectionStartTime
+                ) 
+            }
             addSystemMessage("Conectado a ${session.host.host}:${session.host.port} como ${session.host.username}")
             addSystemMessage("Digite 'exit' para desconectar")
         }
@@ -114,12 +125,16 @@ class TerminalViewModel : ViewModel() {
                         // Speed up polling when active
                         pollInterval = maxOf(MIN_POLL_INTERVAL, pollInterval - 10)
                         Log.v("SSH_POLL", "Active output - interval: ${pollInterval}ms, bytes: ${output.length}")
+                        
+                        // Update poll interval in UI state
+                        _uiState.update { it.copy(currentPollInterval = pollInterval) }
                     } else {
                         emptyReadCount++
                         
                         // Slow down polling when idle
                         if (emptyReadCount > 5) {
                             pollInterval = minOf(MAX_POLL_INTERVAL, pollInterval + 20)
+                            _uiState.update { it.copy(currentPollInterval = pollInterval) }
                         }
                     }
                     
@@ -313,7 +328,10 @@ class TerminalViewModel : ViewModel() {
                     it.copy(
                         isConnected = false,
                         shellMode = false,
-                        ptyEnabled = false
+                        ptyEnabled = false,
+                        hostName = "",
+                        connectionTime = 0L,
+                        currentPollInterval = 100L
                     ) 
                 }
             }
@@ -368,7 +386,10 @@ class TerminalViewModel : ViewModel() {
                 newLines
             }
             
-            state.copy(outputLines = trimmedLines)
+            state.copy(
+                outputLines = trimmedLines,
+                bufferUsage = trimmedLines.size
+            )
         }
     }
 
@@ -391,7 +412,11 @@ data class TerminalUiState(
     val isConnected: Boolean = true,
     val prompt: String = "$ ",
     val ptyEnabled: Boolean = false,  // PTY (interactive) mode enabled (for exec mode)
-    val shellMode: Boolean = false    // Persistent shell mode (PTY always enabled)
+    val shellMode: Boolean = false,   // Persistent shell mode (PTY always enabled)
+    val hostName: String = "",        // Connected host name
+    val connectionTime: Long = 0L,    // Connection start time (millis)
+    val currentPollInterval: Long = 100L, // Current polling interval (ms)
+    val bufferUsage: Int = 0          // Current buffer usage (number of lines)
 )
 
 /**
