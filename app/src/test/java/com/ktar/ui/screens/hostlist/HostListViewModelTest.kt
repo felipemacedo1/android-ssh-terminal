@@ -1,7 +1,7 @@
-package com.felipemacedo.androidsshterminal.ui.screens.hostlist
+package com.ktar.ui.screens.hostlist
 
-import com.felipemacedo.androidsshterminal.data.model.AuthMethod
-import com.felipemacedo.androidsshterminal.data.model.Host
+import com.ktar.data.model.AuthMethod
+import com.ktar.data.model.Host
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -55,7 +55,7 @@ class HostListViewModelTest {
                 port = 22,
                 username = "user1",
                 authMethod = AuthMethod.PASSWORD,
-                encryptedPassword = "encrypted1"
+                password = "encrypted1"
             ),
             Host(
                 id = "2",
@@ -63,8 +63,8 @@ class HostListViewModelTest {
                 host = "server2.com",
                 port = 22,
                 username = "user2",
-                authMethod = AuthMethod.PUBLIC_KEY,
-                encryptedPrivateKey = "encrypted-key"
+                authMethod = AuthMethod.PRIVATE_KEY,
+                privateKey = "encrypted-key"
             )
         )
         
@@ -92,7 +92,7 @@ class HostListViewModelTest {
             port = 22,
             username = "user1",
             authMethod = AuthMethod.PASSWORD,
-            encryptedPassword = "encrypted1"
+            password = "encrypted1"
         )
         
         // val viewModel = HostListViewModel()
@@ -116,7 +116,7 @@ class HostListViewModelTest {
             port = 22,
             username = "user1",
             authMethod = AuthMethod.PASSWORD,
-            encryptedPassword = "encrypted1"
+            password = "encrypted1"
         )
         
         // val viewModel = HostListViewModel()

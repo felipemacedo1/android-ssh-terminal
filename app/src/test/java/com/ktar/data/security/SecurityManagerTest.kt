@@ -1,4 +1,4 @@
-package com.felipemacedo.androidsshterminal.data.security
+package com.ktar.data.security
 
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties

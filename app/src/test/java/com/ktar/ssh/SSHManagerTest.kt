@@ -1,7 +1,7 @@
-package com.felipemacedo.androidsshterminal.ssh
+package com.ktar.ssh
 
-import com.felipemacedo.androidsshterminal.data.model.AuthMethod
-import com.felipemacedo.androidsshterminal.data.model.Host
+import com.ktar.data.model.AuthMethod
+import com.ktar.data.model.Host
 import io.mockk.*
 import kotlinx.coroutines.test.runTest
 import net.schmizz.sshj.SSHClient
@@ -39,7 +39,7 @@ class SSHManagerTest {
             port = 22,
             username = "testuser",
             authMethod = AuthMethod.PASSWORD,
-            encryptedPassword = "encrypted-password"
+            password = "encrypted-password"
         )
         
         // Would need to mock SSHClient and its methods
@@ -58,7 +58,7 @@ class SSHManagerTest {
             port = 22,
             username = "testuser",
             authMethod = AuthMethod.PASSWORD,
-            encryptedPassword = "encrypted-password"
+            password = "encrypted-password"
         )
         
         // Would test authentication failure
@@ -81,7 +81,7 @@ class SSHManagerTest {
             port = 22,
             username = "testuser",
             authMethod = AuthMethod.PASSWORD,
-            encryptedPassword = "encrypted-password"
+            password = "encrypted-password"
         )
         
         // Create mock session
