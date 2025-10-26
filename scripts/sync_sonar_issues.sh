@@ -224,12 +224,24 @@ $code_snippet
         CODE_SMELL) ;; # mantém apenas sonarcloud
       esac
       
-      # Cria issue e captura a URL
+      # Cria issue usando arquivo temporário para evitar problemas com caracteres especiais
+      body_file=$(mktemp)
+      cat > "$body_file" << 'ISSUE_BODY'
+$body
+ISSUE_BODY
+      
+      # Substitui o placeholder pelo body real
+      echo "$body" > "$body_file"
+      
+      # Cria a issue
       issue_url=$(gh issue create \
         --repo "$REPO" \
         --title "$title" \
-        --body "$body" \
+        --body-file "$body_file" \
         --label "$labels" 2>&1)
+      
+      # Remove arquivo temporário
+      rm -f "$body_file"
       
       if [ $? -eq 0 ] && [[ "$issue_url" =~ ^https://github.com ]]; then
         ((CREATED_ISSUES++))
