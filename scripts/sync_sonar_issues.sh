@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e  # Apenas -e, sem pipefail e sem -u para debug completo
+# Sem set -e para evitar exit prematuro, vamos controlar os erros manualmente
 
 ################################################################################
 # SonarCloud to GitHub Issues Synchronization Script
@@ -217,9 +217,6 @@ $code_snippet
     else
       echo -e "${GREEN}🆕 Criando issue: $key${RESET}"
       
-      # DEBUG: Mostra tamanho do body
-      echo "DEBUG: Body length = ${#body}"
-      
       # Determina labels
       labels="sonarcloud"
       case "$type" in
@@ -228,11 +225,8 @@ $code_snippet
         CODE_SMELL) ;; # mantém apenas sonarcloud
       esac
       
-      echo "DEBUG: Labels = $labels"
-      
       # Cria issue usando arquivo temporário para evitar problemas com caracteres especiais
       body_file=$(mktemp)
-      echo "DEBUG: Temp file = $body_file"
       
       # Escreve o body no arquivo
       echo "$body" > "$body_file" || {
@@ -241,32 +235,24 @@ $code_snippet
         continue
       }
       
-      echo "DEBUG: Temp file size = $(wc -c < "$body_file") bytes"
-      
-      # Cria a issue (sem capturar output para ver erro real)
-      echo "DEBUG: Creating issue with gh..."
-      echo "DEBUG: Command: gh issue create --repo $REPO --title \"$title\" --body-file $body_file --label \"$labels\""
-      
-      set +e  # Desabilita exit on error temporariamente
-      gh issue create \
+      # Cria a issue
+      issue_url=$(gh issue create \
         --repo "$REPO" \
         --title "$title" \
         --body-file "$body_file" \
-        --label "$labels"
+        --label "$labels" 2>&1)
       
       exit_code=$?
-      set -e  # Re-habilita exit on error
-      
-      echo "DEBUG: gh exit code = $exit_code"
       
       # Remove arquivo temporário
       rm -f "$body_file"
       
       if [ $exit_code -eq 0 ]; then
         ((CREATED_ISSUES++))
-        echo -e "${GREEN}✓ Issue criada com sucesso${RESET}"
+        echo -e "${GREEN}✓ Criada: $issue_url${RESET}"
       else
-        echo -e "${RED}❌ Falha ao criar issue para $key (exit code: $exit_code)${RESET}"
+        echo -e "${RED}❌ Falha ao criar issue para $key${RESET}"
+        echo -e "${YELLOW}Erro: $issue_url${RESET}"
       fi
     fi
   fi
