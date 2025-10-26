@@ -6,6 +6,16 @@ set -euo pipefail
 # 
 # Resilient, colorized, and self-verified integration script
 # Fetches issues from SonarCloud API and creates corresponding GitHub Issues
+# with code snippets and direct links to the problematic code.
+#
+# Features:
+#   ✓ Automatic code snippet extraction from source files
+#   ✓ GitHub permalink generation for affected lines
+#   ✓ Syntax highlighting based on file extension
+#   ✓ Context lines around the issue (±5 lines)
+#   ✓ Deduplication of existing issues
+#   ✓ Colorized console output
+#   ✓ Dry-run mode for testing
 #
 # Usage:
 #   ./sync_sonar_issues.sh
@@ -99,6 +109,11 @@ while IFS= read -r issue; do
   file=$(echo "$issue" | jq -r '.component' | sed "s|$PROJECT:||")
   line=$(echo "$issue" | jq -r '.line // "?"')
   type=$(echo "$issue" | jq -r '.type')
+  rule=$(echo "$issue" | jq -r '.rule // "unknown"')
+  
+  # Extrai textRange se disponível
+  start_line=$(echo "$issue" | jq -r '.textRange.startLine // .line // 1')
+  end_line=$(echo "$issue" | jq -r '.textRange.endLine // .line // 1')
   
   title="[$severity][$type] $message"
   
@@ -107,15 +122,86 @@ while IFS= read -r issue; do
     title="${title:0:197}..."
   fi
   
-  body="**Arquivo:** \`$file:$line\`
+  # 📝 Extrai snippet do código
+  code_snippet=""
+  github_link=""
+  
+  if [ -f "$file" ] && [ "$start_line" != "?" ]; then
+    # Determina extensão do arquivo para syntax highlighting
+    extension="${file##*.}"
+    case "$extension" in
+      kt) lang="kotlin" ;;
+      java) lang="java" ;;
+      xml) lang="xml" ;;
+      gradle) lang="gradle" ;;
+      kts) lang="kotlin" ;;
+      *) lang="" ;;
+    esac
+    
+    # Calcula contexto (5 linhas antes e depois)
+    context_before=5
+    context_after=5
+    snippet_start=$((start_line - context_before))
+    snippet_end=$((end_line + context_after))
+    
+    # Garante limites válidos
+    [ $snippet_start -lt 1 ] && snippet_start=1
+    
+    # Extrai snippet (máximo 20 linhas para não poluir)
+    total_lines=$((snippet_end - snippet_start + 1))
+    if [ $total_lines -gt 20 ]; then
+      snippet_end=$((start_line + 15))
+    fi
+    
+    # Busca o código
+    snippet=$(sed -n "${snippet_start},${snippet_end}p" "$file" 2>/dev/null)
+    
+    if [ -n "$snippet" ]; then
+      code_snippet="### 📝 Trecho do Código
 
-**SonarCloud Rule:** \`$key\`
+\`\`\`${lang}
+$snippet
+\`\`\`
 
-🔗 [Ver no SonarCloud](https://sonarcloud.io/project/issues?id=$PROJECT&issues=$key&open=$key)
+**Linhas:** $start_line-$end_line (snippet mostra contexto de $snippet_start a $snippet_end)
+"
+    fi
+    
+    # Cria link permanente para o GitHub
+    github_link="https://github.com/$REPO/blob/main/$file#L${start_line}-L${end_line}"
+  fi
+  
+  # Monta o body da issue
+  body="### 🔍 Detalhes da Issue
+
+**Severidade:** \`$severity\`
+**Tipo:** \`$type\`
+**Regra:** \`$rule\`
+**Arquivo:** \`$file\`
+**Linha:** \`$line\`
 
 ---
-> 🤖 Issue criada automaticamente pelo workflow de sincronização
-> 📅 $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
+
+$code_snippet
+
+---
+
+### 🔗 Links Úteis
+
+- 📊 [Ver issue no SonarCloud](https://sonarcloud.io/project/issues?id=$PROJECT&issues=$key&open=$key)
+- 📄 [Ver código completo no GitHub]($github_link)
+- 📖 [Documentação da regra](https://rules.sonarsource.com)
+
+---
+
+### 💬 Mensagem
+
+> $message
+
+---
+
+<sub>🤖 Issue criada automaticamente pelo workflow de sincronização SonarCloud
+📅 $(date -u +"%Y-%m-%d %H:%M:%S UTC")</sub>"
 
   # 6️⃣ Checa se já existe
   existing=$(gh issue list --repo "$REPO" --label "sonarcloud" --state open --json title,number 2>/dev/null | jq --arg t "$title" '.[] | select(.title == $t)' 2>/dev/null || true)
