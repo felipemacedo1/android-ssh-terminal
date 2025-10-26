@@ -203,11 +203,12 @@ $code_snippet
 <sub>🤖 Issue criada automaticamente pelo workflow de sincronização SonarCloud
 📅 $(date -u +"%Y-%m-%d %H:%M:%S UTC")</sub>"
 
-  # 6️⃣ Checa se já existe
-  existing=$(gh issue list --repo "$REPO" --label "sonarcloud" --state open --json title,number 2>/dev/null | jq --arg t "$title" '.[] | select(.title == $t)' 2>/dev/null || true)
+  # 6️⃣ Checa se já existe (busca por título, com ou sem label)
+  existing=$(gh issue list --repo "$REPO" --state open --json title,number 2>/dev/null | jq --arg t "$title" '.[] | select(.title == $t)' 2>/dev/null || true)
   
   if [ -n "$existing" ]; then
-    echo -e "${YELLOW}⚙️  Já existe: $key${RESET}"
+    issue_num=$(echo "$existing" | jq -r '.number')
+    echo -e "${YELLOW}⚙️  Já existe: #$issue_num - $key${RESET}"
     ((SKIPPED_ISSUES++))
   else
     if [ "$DRY_RUN" = "true" ]; then
