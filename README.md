@@ -147,6 +147,35 @@ Este aplicativo implementa diversas camadas de segurança:
 - **Sem logs de credenciais**: Senhas/chaves nunca são registradas em logs
 - **ProGuard**: Ofuscação de código na versão release
 
+## 🔄 Automações CI/CD
+
+### SonarCloud Issues Sync
+
+O projeto inclui sincronização automática de issues do SonarCloud para GitHub Issues:
+
+- **Execução automática**: Toda segunda-feira às 12:00 UTC
+- **Execução manual**: Via GitHub Actions (workflow `sonar-sync.yml`)
+- **Filtros personalizáveis**: Por severidade e tipo de issue
+- **Deduplicação inteligente**: Evita issues duplicadas
+- **Labels automáticas**: Aplicadas por tipo e prioridade
+
+**Configuração rápida:**
+```bash
+# Setup inicial (cria labels e valida setup)
+./scripts/setup_sonar_sync.sh
+
+# Execução manual local
+export SONAR_TOKEN="your-token"
+./scripts/sync_sonar_issues.sh
+
+# Dry run (preview sem criar issues)
+./scripts/sync_sonar_issues.sh --dry-run
+```
+
+📚 **Documentação completa**: [docs/SONARCLOUD_SYNC.md](docs/SONARCLOUD_SYNC.md)
+
+---
+
 ## 🧪 Testes
 
 Execute os testes unitários:

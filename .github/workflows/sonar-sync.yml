@@ -1,0 +1,123 @@
+name: SonarCloud Issues Sync
+
+on:
+  # Run weekly on Mondays at 12:00 UTC
+  schedule:
+    - cron: '0 12 * * 1'
+  
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      severities:
+        description: 'Severity levels to sync (comma-separated)'
+        required: false
+        default: 'BLOCKER,CRITICAL,MAJOR'
+        type: string
+      types:
+        description: 'Issue types to sync (comma-separated)'
+        required: false
+        default: 'BUG,VULNERABILITY,CODE_SMELL,SECURITY_HOTSPOT'
+        type: string
+      dry_run:
+        description: 'Dry run (show what would be created without creating)'
+        required: false
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  sync-sonar-issues:
+    name: Sync SonarCloud Issues to GitHub
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: 🔧 Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y jq curl
+      
+      - name: 🔐 Setup GitHub CLI
+        run: |
+          type -p curl >/dev/null || (sudo apt update && sudo apt install curl -y)
+          curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+          sudo chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg
+          echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+          sudo apt update
+          sudo apt install gh -y
+      
+      - name: 🔑 Authenticate GitHub CLI
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+      
+      - name: ✅ Verify authentication
+        run: |
+          gh auth status
+      
+      - name: 🔄 Run synchronization script
+        env:
+          SONAR_ORG: ${{ secrets.SONAR_ORG || 'felipemacedo1' }}
+          SONAR_PROJECT: ${{ secrets.SONAR_PROJECT || 'felipemacedo1_ktar' }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SEVERITIES: ${{ inputs.severities || 'BLOCKER,CRITICAL,MAJOR' }}
+          TYPES: ${{ inputs.types || 'BUG,VULNERABILITY,CODE_SMELL,SECURITY_HOTSPOT' }}
+        run: |
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  🔄 SonarCloud → GitHub Issues Sync"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "Configuration:"
+          echo "  Organization: $SONAR_ORG"
+          echo "  Project:      $SONAR_PROJECT"
+          echo "  Severities:   $SEVERITIES"
+          echo "  Types:        $TYPES"
+          echo "  Dry Run:      ${{ inputs.dry_run || 'false' }}"
+          echo ""
+          
+          if [ "${{ inputs.dry_run }}" == "true" ]; then
+            ./scripts/sync_sonar_issues.sh --dry-run
+          else
+            ./scripts/sync_sonar_issues.sh
+          fi
+      
+      - name: 📊 Upload sync report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-sync-report-${{ github.run_number }}
+          path: |
+            sync_report.log
+          retention-days: 30
+          if-no-files-found: ignore
+      
+      - name: 💬 Comment on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue_number = context.payload.issue?.number;
+            if (issue_number) {
+              github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue_number,
+                body: '❌ SonarCloud issues synchronization failed. Check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for details.'
+              });
+            }
+      
+      - name: ✅ Success notification
+        if: success()
+        run: |
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  ✅ SonarCloud issues synchronized successfully"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo ""
+          echo "🔗 View issues: https://github.com/${{ github.repository }}/issues?q=is%3Aissue+is%3Aopen+label%3Asonarcloud"
+          echo ""
