@@ -79,7 +79,7 @@ check_dependencies() {
         log_info "Install them with:"
         log_info "  sudo apt-get install curl jq"
         log_info "  curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg"
-        log_info "  echo \"deb [arch=\$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main\" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null"
+        log_info "  echo \"deb [arch=\\$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main\" | sudo tee /etc/apt/so[...]"
         log_info "  sudo apt-get update && sudo apt-get install gh"
         exit 1
     fi
@@ -158,11 +158,12 @@ fetch_sonar_issues() {
 
 issue_exists_in_github() {
     local title="$1"
-    
-    # Search for existing issues with the same title and sonarcloud label
+
+    # Get list of open issues with sonarcloud label in JSON, then safely compare titles using jq --arg
     local existing
-    existing=$(gh issue list --label "sonarcloud" --state open --search "$title" --json title,number --jq ".[] | select(.title == \"$title\") | .number" 2>/dev/null || echo "")
-    
+    existing=$(gh issue list --label "sonarcloud" --state open --search "$title" --json title,number 2>/dev/null \
+        | jq -r --arg t "$title" '.[] | select(.title == $t) | .number' 2>/dev/null || echo "")
+
     if [ -n "$existing" ]; then
         return 0  # exists
     else
@@ -264,16 +265,16 @@ EOF
     local labels="sonarcloud"
     
     case "$type" in
-        BUG)                labels="$labels,bug" ;;
-        VULNERABILITY)      labels="$labels,security,vulnerability" ;;
-        CODE_SMELL)         labels="$labels,code-quality" ;;
-        SECURITY_HOTSPOT)   labels="$labels,security,security-hotspot" ;;
+        BUG)                labels="$labels,bug" ;; 
+        VULNERABILITY)      labels="$labels,security,vulnerability" ;; 
+        CODE_SMELL)         labels="$labels,code-quality" ;; 
+        SECURITY_HOTSPOT)   labels="$labels,security,security-hotspot" ;; 
     esac
     
     case "$severity" in
-        BLOCKER|CRITICAL)   labels="$labels,priority:high" ;;
-        MAJOR)              labels="$labels,priority:medium" ;;
-        MINOR|INFO)         labels="$labels,priority:low" ;;
+        BLOCKER|CRITICAL)   labels="$labels,priority:high" ;; 
+        MAJOR)              labels="$labels,priority:medium" ;; 
+        MINOR|INFO)         labels="$labels,priority:low" ;; 
     esac
     
     # Create the issue
