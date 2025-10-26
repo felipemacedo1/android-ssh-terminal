@@ -130,18 +130,34 @@ while IFS= read -r issue; do
     else
       echo -e "${GREEN}🆕 Criando issue: $key${RESET}"
       
-      # Cria issue sem labels para debug
-      if gh issue create \
+      # Determina labels
+      labels="sonarcloud"
+      case "$type" in
+        BUG) labels="$labels,bug" ;;
+        VULNERABILITY) labels="$labels,security" ;;
+        CODE_SMELL) ;; # mantém apenas sonarcloud
+      esac
+      
+      # Cria issue e captura a URL
+      issue_url=$(gh issue create \
         --repo "$REPO" \
         --title "$title" \
-        --body "$body"; then
+        --body "$body" \
+        --label "$labels" 2>&1)
+      
+      if [ $? -eq 0 ] && [[ "$issue_url" =~ ^https://github.com ]]; then
         ((CREATED_ISSUES++))
+        echo -e "${GREEN}✓ Criada: $issue_url${RESET}"
       else
         echo -e "${RED}❌ Falha ao criar issue para $key${RESET}"
+        echo -e "${YELLOW}Resposta: $issue_url${RESET}"
       fi
     fi
   fi
 done < <(echo "$response" | jq -c '.issues[]')
+
+# Garante exit 0
+true
 
 # 7️⃣ Sumário final
 echo ""
