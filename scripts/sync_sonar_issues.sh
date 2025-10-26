@@ -130,25 +130,11 @@ while IFS= read -r issue; do
     else
       echo -e "${GREEN}🆕 Criando issue: $key${RESET}"
       
-      # Determina labels
-      labels="sonarcloud"
-      case "$type" in
-        BUG) labels="$labels,bug" ;;
-        VULNERABILITY) labels="$labels,security,vulnerability" ;;
-        CODE_SMELL) labels="$labels,code-quality" ;;
-      esac
-      
-      case "$severity" in
-        BLOCKER|CRITICAL) labels="$labels,priority:high" ;;
-        MAJOR) labels="$labels,priority:medium" ;;
-        MINOR|INFO) labels="$labels,priority:low" ;;
-      esac
-      
+      # Cria issue sem labels para debug
       if gh issue create \
         --repo "$REPO" \
         --title "$title" \
-        --body "$body" \
-        --label "$labels" >/dev/null 2>&1; then
+        --body "$body"; then
         ((CREATED_ISSUES++))
       else
         echo -e "${RED}❌ Falha ao criar issue para $key${RESET}"
