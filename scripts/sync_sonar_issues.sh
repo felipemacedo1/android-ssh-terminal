@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -eo pipefail  # Removido 'u' temporariamente para debug
 
 ################################################################################
 # SonarCloud to GitHub Issues Synchronization Script
@@ -216,6 +216,9 @@ $code_snippet
     else
       echo -e "${GREEN}🆕 Criando issue: $key${RESET}"
       
+      # DEBUG: Mostra tamanho do body
+      echo "DEBUG: Body length = ${#body}"
+      
       # Determina labels
       labels="sonarcloud"
       case "$type" in
@@ -224,26 +227,37 @@ $code_snippet
         CODE_SMELL) ;; # mantém apenas sonarcloud
       esac
       
+      echo "DEBUG: Labels = $labels"
+      
       # Cria issue usando arquivo temporário para evitar problemas com caracteres especiais
       body_file=$(mktemp)
-      cat > "$body_file" << 'ISSUE_BODY'
-$body
-ISSUE_BODY
+      echo "DEBUG: Temp file = $body_file"
       
-      # Substitui o placeholder pelo body real
-      echo "$body" > "$body_file"
+      # Escreve o body no arquivo
+      echo "$body" > "$body_file" || {
+        echo "ERROR: Failed to write body to temp file"
+        rm -f "$body_file"
+        continue
+      }
+      
+      echo "DEBUG: Temp file size = $(wc -c < "$body_file") bytes"
       
       # Cria a issue
+      echo "DEBUG: Creating issue with gh..."
       issue_url=$(gh issue create \
         --repo "$REPO" \
         --title "$title" \
         --body-file "$body_file" \
         --label "$labels" 2>&1)
       
+      exit_code=$?
+      echo "DEBUG: gh exit code = $exit_code"
+      echo "DEBUG: gh output = $issue_url"
+      
       # Remove arquivo temporário
       rm -f "$body_file"
       
-      if [ $? -eq 0 ] && [[ "$issue_url" =~ ^https://github.com ]]; then
+      if [ $exit_code -eq 0 ] && [[ "$issue_url" =~ ^https://github.com ]]; then
         ((CREATED_ISSUES++))
         echo -e "${GREEN}✓ Criada: $issue_url${RESET}"
       else
