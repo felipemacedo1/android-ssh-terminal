@@ -19,6 +19,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          clean: true
+      
+      - name: Verify script version
+        run: |
+          echo "📝 Checking script version..."
+          head -5 scripts/sync_sonar_issues.sh
+          if grep -q "DEBUG:" scripts/sync_sonar_issues.sh; then
+            echo "❌ WARNING: Script still has DEBUG statements!"
+          else
+            echo "✅ Script is clean (no DEBUG statements)"
+          fi
       
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y jq
