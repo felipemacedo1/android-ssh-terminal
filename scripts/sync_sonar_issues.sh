@@ -92,7 +92,7 @@ echo -e "${GREEN}✅ $count issues encontradas!${RESET}"
 TOTAL_SONAR_ISSUES=$count
 
 # 5️⃣ Processa cada issue
-echo "$response" | jq -c '.issues[]' | while read -r issue; do
+while IFS= read -r issue; do
   key=$(echo "$issue" | jq -r '.key')
   severity=$(echo "$issue" | jq -r '.severity')
   message=$(echo "$issue" | jq -r '.message')
@@ -118,7 +118,9 @@ echo "$response" | jq -c '.issues[]' | while read -r issue; do
 > 📅 $(date -u +"%Y-%m-%d %H:%M:%S UTC")"
 
   # 6️⃣ Checa se já existe
-  if gh issue list --repo "$REPO" --label "sonarcloud" --state open --json title,number 2>/dev/null | jq -e --arg t "$title" '.[] | select(.title == $t)' >/dev/null 2>&1; then
+  existing=$(gh issue list --repo "$REPO" --label "sonarcloud" --state open --json title,number 2>/dev/null | jq --arg t "$title" '.[] | select(.title == $t)' 2>/dev/null || true)
+  
+  if [ -n "$existing" ]; then
     echo -e "${YELLOW}⚙️  Já existe: $key${RESET}"
     ((SKIPPED_ISSUES++))
   else
@@ -153,7 +155,7 @@ echo "$response" | jq -c '.issues[]' | while read -r issue; do
       fi
     fi
   fi
-done
+done < <(echo "$response" | jq -c '.issues[]')
 
 # 7️⃣ Sumário final
 echo ""
