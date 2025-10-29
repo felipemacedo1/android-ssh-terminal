@@ -11,8 +11,8 @@ android {
         applicationId = "com.ktar"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.4.1"
+        versionCode = 6
+        versionName = "1.0.0-beta1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

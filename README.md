@@ -36,9 +36,39 @@ Um aplicativo Android profissional e seguro para conexão SSH a servidores remot
 - ✅ **Suporte a múltiplas sessões**
 - ✅ **Host key verification** (Trust On First Use)
 
-## 📱 Capturas de Tela
+## 📥 Installation
 
-_(Em breve - adicionarei screenshots)_
+KTAR requires Android 8.0 (API 26) or higher.
+
+**Option 1: Download Pre-built APK** (Easiest)
+- Go to [Releases](https://github.com/felipemacedo1/ktar/releases)
+- Download the latest `app-debug.apk`
+- Install on your Android device
+
+**Option 2: Build from Source**
+- See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed build instructions
+
+## 🚀 Getting Started
+
+1. **Install KTAR** on your Android device
+2. **Open the app** and grant required permissions
+3. **Add a connection**:
+   - Tap the "+" button
+   - Enter SSH server details (host, port, username)
+   - Choose authentication method (password or key)
+4. **Connect** and start using the terminal!
+
+For detailed setup, see [docs/INSTALL.md](docs/INSTALL.md)
+
+## 📚 Documentation
+
+- 📖 **[Installation Guide](docs/INSTALL.md)** - Detailed setup instructions
+- 🔧 **[Development Guide](DEVELOPMENT.md)** - Build from source
+- 🏗️ **[Architecture](ARCHITECTURE.md)** - Technical overview
+- 🤝 **[Contributing](CONTRIBUTING.md)** - How to contribute
+- ❓ **[FAQ](docs/FAQ.md)** - Common questions
+- 🔄 **[Migration Guide](docs/MIGRATION.md)** - Upgrading from v1.4.1
+- 🔐 **[Security Policy](SECURITY.md)** - Security & vulnerabilities
 
 ## 🛠️ Stack Tecnológica
 
