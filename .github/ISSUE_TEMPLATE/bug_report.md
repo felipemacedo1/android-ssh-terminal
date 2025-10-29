@@ -1,36 +1,47 @@
 ---
 name: Bug Report
-about: Reporte um bug ou problema no aplicativo
+about: Report a bug or issue
 title: '[BUG] '
 labels: bug
 assignees: ''
 ---
 
-## 🐛 Descrição do Bug
-Uma descrição clara e concisa do bug.
+## 📝 Description
 
-## 📱 Informações do Dispositivo
-- **Modelo**: (ex: Samsung Galaxy S21)
-- **Android**: (ex: 12.0)
-- **Versão do App**: (ex: v1.0.0)
+A clear and concise description of the bug.
 
-## 🔄 Passos para Reproduzir
-1. Vá para '...'
-2. Clique em '...'
-3. Digite '...'
-4. Veja o erro
+## 📱 Environment
 
-## ✅ Comportamento Esperado
-Descrição do que deveria acontecer.
+- **Device Model**: (e.g., Samsung Galaxy S21)
+- **Android Version**: (e.g., 12.0)
+- **KTAR Version**: (e.g., v1.0.0-beta1)
 
-## ❌ Comportamento Atual
-Descrição do que está acontecendo.
+## 🔄 Steps to Reproduce
+
+1. Go to '...'
+2. Click on '...'
+3. Execute '...'
+4. See error
+
+## ✅ Expected Behavior
+
+What should happen?
+
+## ❌ Actual Behavior
+
+What is happening instead?
 
 ## 📸 Screenshots
-Se aplicável, adicione screenshots para ajudar a explicar o problema.
+
+Add screenshots if applicable.
 
 ## 📋 Logs
-Se possível, inclua logs relevantes do Android Studio ou logcat.
 
-## ℹ️ Informações Adicionais
-Qualquer outra informação sobre o problema.
+```
+Paste relevant logs here
+adb logcat output, crashes, etc.
+```
+
+## 📌 Additional Context
+
+Any other relevant information.
